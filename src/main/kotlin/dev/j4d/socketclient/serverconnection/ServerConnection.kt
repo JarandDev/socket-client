@@ -1,11 +1,15 @@
 package dev.j4d.socketclient.serverconnection
 
+import dev.j4d.socketclient.command.Ping
+import dev.j4d.socketclient.command.Pong
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.BufferedReader
 import java.io.PrintWriter
 import java.net.Socket
+import java.time.Instant
+import java.util.*
 
 class ServerConnection(
     private val socket: Socket,
@@ -14,25 +18,37 @@ class ServerConnection(
 ) {
 
     fun run() = runBlocking(Dispatchers.IO) {
+
         launch {
-            println("Sending ping every 10th second")
             while (!socket.isClosed) {
-                writer.println("PING")
-                println("Sent: PING")
+                val ping = Ping(
+                    id = UUID.randomUUID(),
+                    type = "ServerAlive",
+                    time = Instant.now()
+                )
+                val output = ping.serialize()
+                writer.println(output)
+                println("Output: $output")
                 Thread.sleep(10_000L)
             }
         }
 
         launch {
-            println("Reading from server")
             while (!socket.isClosed) {
                 val line = reader.readLine()
-                println("Received: $line")
+                println("Input: $line")
                 if (line == null) {
                     socket.close()
-                } else if (line == "PING") {
-                    writer.println("PONG")
-                    println("Sent: PONG")
+                } else if (line.startsWith("PING")) {
+                    val ping = Ping.deserialize(line = line)
+                    println("Ping received with id: ${ping.id}")
+                    val pong = Pong.from(ping = ping)
+                    val output = pong.serialize()
+                    writer.println(output)
+                    println("Output: $output")
+                } else if (line.startsWith("PONG")) {
+                    val pong = Pong.deserialize(line = line)
+                    println("Pong received with id: ${pong.id} triggered by ping with id: ${pong.pingId}")
                 }
             }
         }
