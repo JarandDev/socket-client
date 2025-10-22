@@ -13,7 +13,7 @@ data class Pong(
 
     companion object {
         fun deserialize(line: String): Pong {
-            val arguments = line.replace("PONG ", "")
+            val arguments = line.removePrefix("PONG ")
             val parts = arguments.split(" ")
             val fields = parts.associate {
                 val (key, value) = it.split("=")

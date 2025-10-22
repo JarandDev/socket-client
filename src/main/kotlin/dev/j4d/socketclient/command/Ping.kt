@@ -12,7 +12,7 @@ data class Ping(
 
     companion object {
         fun deserialize(line: String): Ping {
-            val arguments = line.replace("PING ", "")
+            val arguments = line.removePrefix("PING ")
             val parts = arguments.split(" ")
             val fields = parts.associate {
                 val (key, value) = it.split("=")
