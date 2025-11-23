@@ -22,7 +22,7 @@
 
         <maven-surefire.version>3.5.4</maven-surefire.version>
         <maven-failsafe.version>3.5.4</maven-failsafe.version>
-        <spotless.version>3.0.0</spotless.version>
+        <spotless.version>3.1.0</spotless.version>
     </properties>
 
     <dependencies>
